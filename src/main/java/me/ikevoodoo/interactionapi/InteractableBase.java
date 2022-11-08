@@ -13,13 +13,15 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
+@SuppressWarnings("unused")
 public abstract class InteractableBase<K, V, E extends Enum<?>> {
 
     private final List<InteractionHandler<V, E>> handlers = new ArrayList<>();
+    private final List<InteractionPredicate<V, E>> predicates = new ArrayList<>();
     private final Plugin plugin;
     private final Listener listener;
 
-    public InteractableBase(Plugin plugin) {
+    protected InteractableBase(Plugin plugin) {
         this.plugin = plugin;
         this.listener = new Listener() {};
     }
@@ -29,6 +31,10 @@ public abstract class InteractableBase<K, V, E extends Enum<?>> {
         return this;
     }
 
+    public InteractableBase<K, V, E> addPredicate(InteractionPredicate<V, E> predicate) {
+        this.predicates.add(predicate);
+        return this;
+    }
 
     public abstract void register(K key);
 
@@ -52,8 +58,14 @@ public abstract class InteractableBase<K, V, E extends Enum<?>> {
     }
 
     protected boolean triggerInteraction(Player source, World world, V value, E type) {
+        for (InteractionPredicate<V, E> predicate : this.predicates) {
+            if (!predicate.test(source, world, value, type)) {
+                return false;
+            }
+        }
+
         for (InteractionHandler<V, E> handler : this.handlers) {
-            if (!handler.handle(source, world,value, type)) {
+            if (!handler.handle(source, world, value, type)) {
                 return false;
             }
         }
