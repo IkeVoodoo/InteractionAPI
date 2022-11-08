@@ -1,0 +1,7 @@
+name: Interaction-API
+version: '1.0'
+main: me.ikevoodoo.interactionapi.InteractionApi
+api-version: 1.17
+load: POSTWORLD
+authors: [ IkeVoodoo ]
+description: Listen for player interaction
